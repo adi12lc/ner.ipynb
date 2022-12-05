@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-from st_aggrid import GridOptionsBuilder, AgGrid
+import warnings
+warnings.filterwarnings("ignore")
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
@@ -12,11 +13,12 @@ st.markdown('# NoCodeAI App')
 st.markdown("")
 st.markdown("---")
 
-st.sidebar.header('Upload your CSV data')
-data = st.sidebar.file_uploader('Upload your file', type=['CSV','xlsx'])
-df = pd.read_csv(data)
-# st.write(df.shape)
-# st.markdown("---")
+data1 = st.radio('View from top (head) or bottom (tail)', ('File', 'Database'))
+if data1 == 'File':
+    st.sidebar.header('Upload your file')
+    dataset = st.sidebar.file_uploader('', type=['CSV', 'xlsx'])
+    df = pd.read_csv(dataset)
+
 
 if st.checkbox('Show  Dataset'):
     num = st.number_input('No. of Rows', 5, 10)
@@ -32,44 +34,60 @@ if st.checkbox('Show  Dataset'):
     st.write("##")
     st.write("Rows , Column :",df.shape)
 
-    st.markdown("---")
+st.markdown("---")
 
-    df_null=(df.isnull().sum()/len(df))*100
+if st.checkbox('Check for null values'):
+    df_null = (df.isnull().sum() / len(df)) * 100
     null_percent = df_null.sum()
-    if null_percent==0:
+    if null_percent == 0:
         st.write("##")
         st.markdown('No missing values')
-
 st.markdown("---")
 
 st.markdown("##### Model Building")
-option = st.selectbox('Choose target variable',(df.columns))
+option = st.sidebar.selectbox('Choose target variable', (df.columns), help="Select dependent variable")
 
-st.write('Target variable:', option)
+# st.write('Target variable:', option)
 
-Y=df[option]
-X=df.drop(option,axis=1)
+Y = df[option]
+X = df.drop(option, axis=1)
 
-xtrain,xtest,ytrain,ytest = train_test_split(X,Y,test_size=0.2)
+x_train, xtest, y_train, ytest = train_test_split(X, Y, test_size=0.2, random_state=42)
 
-lr_mod=LogisticRegression()
-lr_mod.fit(xtrain,ytrain)
-train_pred=lr_mod.predict(xtrain)
-test_pred=lr_mod.predict(xtest)
-
-accuracy = accuracy_score(ytest,test_pred)
-f1score = f1_score(ytest,test_pred)
-
-option = st.selectbox('evaluation metrics',(accuracy,f1score))
-
-st.write('score:', option)
+option = st.sidebar.selectbox('Choose evaluation metric',('Logistic Regression','RandomForestClassifier'))
 
 
+if option == 'Logistic Regression':
+    st.write("Algorithm:",option)
+    mod = LogisticRegression()
+    mod.fit(x_train, y_train)
 
+elif option == 'RandomForestClassifier':
+    st.write("Algorithm:", option)
+    values = st.slider('n_estimators',0, 100, (0))
+    mod = RandomForestClassifier(n_estimators=values)
+    mod.fit(x_train, y_train)
 
+train_pred = mod.predict(x_train)
+test_pred = mod.predict(xtest)
 
+st.markdown("---")
 
-# if st.checkbox('Check for Missing values'):
+st.markdown("##### Model performance")
+
+option = st.sidebar.selectbox('Choose evaluation metric',('accuracy','f1_score'))
+
+if option == 'accuracy':
+    accuracy_var = accuracy_score(ytest, test_pred)
+    accuracy_var = round(accuracy_var,2)
+    st.write(option, 'score:', accuracy_var)
+else:
+    f1score_var = f1_score(ytest, test_pred)
+    f1score_var = round(f1score_var,2)
+    st.write(option, 'score:', f1score_var)
+
+st.markdown("---")
+
 
 
 
