@@ -94,7 +94,7 @@ else:
     f1score_var = round(f1score_var,2)
     st.write(option, 'score:', f1score_var)
 
-st.markdown("---")
+st.markdown("---") "new"
 
 
 
