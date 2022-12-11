@@ -11,7 +11,7 @@ from sklearn.metrics import f1_score,accuracy_score
 
 st.set_page_config(page_title='NoCodeAI App',layout='wide')
 
-st.markdown('# NoCodeAI')
+st.markdown('# NoCodeAI App')
 st.markdown("")
 st.markdown("---")
 
@@ -72,7 +72,7 @@ if option == 'Logistic Regression':
 
 elif option == 'RandomForestClassifier':
     st.write("Algorithm:", option)
-    values = st.sidebar.slider('n_estimators',1, 100, (1))
+    values = st.sidebar.slider('n_estimators',0, 100, (0))
     mod = RandomForestClassifier(n_estimators=values)
     mod.fit(x_train, y_train)
 
@@ -80,22 +80,21 @@ train_pred = mod.predict(x_train)
 test_pred = mod.predict(xtest)
 
 st.markdown("---")
-if st.checkbox("Model performance"):
-    st.markdown("##### Model performance Score")
 
-    option = st.sidebar.selectbox('Choose evaluation metric',('accuracy','f1_score'))
+st.markdown("##### Model performance")
 
-    if option == 'accuracy':
-        accuracy_var = accuracy_score(ytest, test_pred)
-        accuracy_var = round(accuracy_var,2)
-        st.write(option, 'score:', accuracy_var)
-    else:
-        f1score_var = f1_score(ytest, test_pred)
-        f1score_var = round(f1score_var,2)
-        st.write(option, 'score:', f1score_var)
+option = st.sidebar.selectbox('Choose evaluation metric',('accuracy','f1_score'))
+
+if option == 'accuracy':
+    accuracy_var = accuracy_score(ytest, test_pred)
+    accuracy_var = round(accuracy_var,2)
+    st.write(option, 'score:', accuracy_var)
+else:
+    f1score_var = f1_score(ytest, test_pred)
+    f1score_var = round(f1score_var,2)
+    st.write(option, 'score:', f1score_var)
 
 st.markdown("---")
-
 
 
 
